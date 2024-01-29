@@ -61,11 +61,31 @@ export const MembersModal = () => {
                 url: `/api/members/${memberId}`,
                 query: {
                     serverId: server?.id,
-                    memberId,
                 },
             });
 
             const response = await axios.patch(url, { role });
+
+            router.refresh();
+            onOpen('members', { server: response.data });
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoadingId('');
+        }
+    };
+
+    const onKick = async (memberId: string) => {
+        try {
+            setLoadingId(memberId);
+            const url = qs.stringifyUrl({
+                url: `/api/members/${memberId}`,
+                query: {
+                    serverId: server?.id,
+                },
+            });
+
+            const response = await axios.delete(url);
 
             router.refresh();
             onOpen('members', { server: response.data });
@@ -152,7 +172,12 @@ export const MembersModal = () => {
                                                     </DropdownMenuPortal>
                                                 </DropdownMenuSub>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        onKick(member.id)
+                                                    }
+                                                    className="text-rose-500"
+                                                >
                                                     <Gavel className="mr-2 h-4 w-4" />
                                                     Kick
                                                 </DropdownMenuItem>
