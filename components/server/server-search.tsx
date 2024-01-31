@@ -2,6 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 
 import {
     CommandDialog,
@@ -28,6 +29,8 @@ interface ServerSearchProps {
 
 export const ServerSearch = ({ data }: ServerSearchProps) => {
     const [open, setOpen] = useState(false);
+    const router = useRouter();
+    const params = useParams();
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -40,6 +43,26 @@ export const ServerSearch = ({ data }: ServerSearchProps) => {
         document.addEventListener('keydown', down);
         return () => document.removeEventListener('keydown', down);
     }, []);
+
+    const onCLick = ({
+        id,
+        type,
+    }: {
+        id: string;
+        type: 'channel' | 'member';
+    }) => {
+        setOpen(false);
+
+        if (type === 'member') {
+            return router.push(
+                `/servers/${params?.serverId}/conversations/${id}`,
+            );
+        }
+
+        if (type === 'channel') {
+            return router.push(`/servers/${params?.serverId}/channels/${id}`);
+        }
+    };
 
     return (
         <>
@@ -66,7 +89,12 @@ export const ServerSearch = ({ data }: ServerSearchProps) => {
                             <CommandGroup key={label} heading={label}>
                                 {data?.map(({ id, icon, name }) => {
                                     return (
-                                        <CommandItem key={id}>
+                                        <CommandItem
+                                            key={id}
+                                            onSelect={() =>
+                                                onCLick({ id, type })
+                                            }
+                                        >
                                             {icon}
                                             <span>{name}</span>
                                         </CommandItem>
